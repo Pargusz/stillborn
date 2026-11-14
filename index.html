@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Stillborn MC FiveM yeleği: iki seçenek yan yana 3D önizleme.">
+<meta name="theme-color" content="#0f0e0d">
+<title>Stillborn MC Yelek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Barlow+Condensed:wght@500;600&family=Barlow:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+  /* Layout: dark leather page. Two 3D vests side by side (A | B) under one shared view bar,
+     then a comparison table, the two texture sheets, and the in-game steps for each. */
+  :root {
+    --leather: #0f0e0d;      /* page ground */
+    --hide: #191715;         /* raised panels */
+    --seam: #2c2925;         /* hairlines, borders */
+    --thread: #e9e4da;       /* bone-white embroidery thread */
+    --dim: #a09a90;          /* secondary text */
+    --oxblood: #9a3b30;      /* single muted accent */
+    --display: "Pirata One", "Old English Text MT", Georgia, serif;
+    --label: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--leather);
+    color: var(--thread);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-block: 40px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  header { display: grid; gap: 6px; }
+  .eyebrow {
+    font-family: var(--label);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 13px;
+    color: var(--dim);
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(48px, 9vw, 92px);
+    line-height: 0.95;
+    margin: 0;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+  h1 span { color: var(--dim); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 66ch; }
+
+  .compare { display: grid; gap: 14px; }
+  .viewbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+    justify-content: space-between;
+  }
+  .viewbar .group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .viewbar .hint {
+    font-family: var(--label); font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .viewbar button {
+    font-family: var(--label);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--thread);
+    background: transparent;
+    border: 1px dashed var(--dim);
+    border-radius: 3px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .viewbar button[aria-pressed="true"] { border-style: solid; border-color: var(--thread); background: var(--hide); }
+  .viewbar button:hover { border-color: var(--thread); }
+  .viewbar button:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+
+  .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .option { display: grid; gap: 12px; align-content: start; }
+  .stage {
+    position: relative;
+    background: radial-gradient(ellipse at 50% 40%, #24211e 0%, var(--leather) 70%);
+    border: 1px solid var(--seam);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .vest {
+    width: 100%;
+    height: min(66vh, 600px);
+    min-height: 360px;
+    display: block;
+    touch-action: none;
+    cursor: grab;
+  }
+  .vest canvas { display: block; width: 100%; height: 100%; }
+  .status {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-family: var(--label); letter-spacing: 0.16em; text-transform: uppercase;
+    font-size: 13px; color: var(--dim); pointer-events: none;
+  }
+  .status[hidden] { display: none; }
+  .tag {
+    position: absolute; left: 14px; top: 10px;
+    font-family: var(--display); font-size: 44px; line-height: 1;
+    color: var(--thread); pointer-events: none;
+  }
+  .option h2 { margin: 0; padding: 0; border: 0; }
+  .option p { margin: 0; color: var(--dim); font-size: 15px; }
+
+  h2 {
+    font-family: var(--label);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 18px;
+    margin: 0 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--seam);
+  }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--seam); }
+  thead th {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 14px; color: var(--thread);
+  }
+  tbody th {
+    font-family: var(--label); font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 13px; color: var(--dim); width: 22%;
+  }
+  td { color: var(--thread); }
+  td .yes { color: var(--thread); font-weight: 500; }
+  td .no { color: #d98a7e; font-weight: 500; }
+
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  @media (max-width: 820px) {
+    .pair, .two { grid-template-columns: minmax(0, 1fr); }
+    .viewbar .hint { display: none; }
+    .vest { height: 420px; }
+  }
+
+  figure { margin: 0; display: grid; gap: 10px; }
+  figure img { width: 100%; max-width: 100%; height: auto; display: block; border: 1px solid var(--seam); border-radius: 3px; }
+  figcaption { font-size: 14px; color: var(--dim); }
+
+  h3 {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 16px; margin: 0 0 12px;
+  }
+  ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
+  ol.steps li::before {
+    content: counter(s);
+    font-family: var(--display); font-size: 24px; line-height: 1.1; color: var(--oxblood);
+  }
+  ol.steps p { margin: 0; }
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--hide);
+    border: 1px solid var(--seam);
+    border-radius: 3px;
+    padding: 1px 5px;
+    overflow-wrap: anywhere;
+  }
+  .note {
+    margin-top: 18px; padding: 14px 16px;
+    border-left: 3px solid var(--oxblood);
+    background: var(--hide);
+    font-size: 14px; color: var(--dim);
+  }
+  .note strong { color: var(--thread); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">FiveM · Stillborn MC yelek · İki seçenek</div>
+    <h1>Stillborn <span>MC</span></h1>
+    <p class="lede">İki yelek yan yana. A, referans sitedeki TheC yeleği. B, gönderdiğin SKAL paketindeki yelek. İkisinde de arkada kulüp logosu, önde STILLBORN ve PALETO BAY yazıları var. Modelleri sürükleyerek çevirebilirsin.</p>
+  </header>
+
+  <section class="compare" aria-label="İki yeleğin 3D karşılaştırması">
+    <div class="viewbar">
+      <div class="group" role="group" aria-label="İki yeleğin görünümü">
+        <button type="button" id="btn-back" aria-pressed="true">Arka</button>
+        <button type="button" id="btn-front" aria-pressed="false">Ön</button>
+        <button type="button" id="btn-spin" aria-pressed="true">Döndür</button>
+      </div>
+      <div class="hint">Düğmeler ikisini birlikte çevirir · Sürükle · Yakınlaştır</div>
+    </div>
+
+    <div class="pair">
+      <article class="option">
+        <div class="stage">
+          <div class="vest" id="vest-a" role="img" aria-label="A: TheC deri yeleği, arkasında Stillborn MC logosu"></div>
+          <div class="status">Yelek yükleniyor…</div>
+          <div class="tag" aria-hidden="true">A</div>
+        </div>
+        <h2>A · TheC yeleği</h2>
+        <p>Deri yelek, tek parça arma. Önde sol cepte STILLBORN bandı, altta PALETO BAY bandı. Enforcer ve bayrak yaması duruyor.</p>
+      </article>
+
+      <article class="option">
+        <div class="stage">
+          <div class="vest" id="vest-b" role="img" aria-label="B: SKAL kamuflaj astarlı yelek, arkasında Stillborn MC logosu"></div>
+          <div class="status">Yelek yükleniyor…</div>
+          <div class="tag" aria-hidden="true">B</div>
+        </div>
+        <h2>B · SKAL yeleği</h2>
+        <p>Kamuflaj omuzlu yelek. Arkada büyük logo. Önde göğüste küçük logo, altta beyaz STILLBORN / PALETO BAY. yaması.</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="fark">
+    <h2 id="fark">Farklar</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Özellik</th><th scope="col">A · TheC</th><th scope="col">B · SKAL</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Oyuna hazır mı</th><td><span class="no">Hayır.</span> Sadece doku hazır. Yeleğin modeli (<code>.ydd</code>) TheC Custom's'ta.</td><td><span class="yes">Evet.</span> Hazır FiveM kaynağı: model, doku ve ayar dosyaları içinde.</td></tr>
+          <tr><th scope="row">Slot</th><td>Bileşen 7 · Aksesuar</td><td>Bileşen 9 · Yelek / zırh (task)</td></tr>
+          <tr><th scope="row">Doku</th><td>2048 × 2048 · DXT5</td><td>4096 × 4096 · DXT1</td></tr>
+          <tr><th scope="row">Arka</th><td>Büyük logo</td><td>Büyük logo</td></tr>
+          <tr><th scope="row">Ön</th><td>Sol cepte STILLBORN bandı, altta PALETO BAY bandı</td><td>Göğüste küçük logo, altta STILLBORN / PALETO BAY. yaması</td></tr>
+          <tr><th scope="row">Model hakkı</th><td>TheC Custom's'tan izin gerekir</td><td>Gönderdiğin paketin modeli kullanıldı</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="doku">
+    <h2 id="doku">Doku sayfaları</h2>
+    <div class="two">
+      <figure>
+        <img src="doku.jpg" alt="A yeleğinin doku sayfası: solda arka panel ve logo, sağda ön paneller" width="1024" height="1024" loading="lazy">
+        <figcaption>A · <code>teef_diff_005_b_uni</code> · 2048 px</figcaption>
+      </figure>
+      <figure>
+        <img src="doku_skal.jpg" alt="B yeleğinin doku sayfası: solda büyük logo, sağda ön paneller ve STILLBORN / PALETO BAY yaması" width="1024" height="1024" loading="lazy">
+        <figcaption>B · <code>task_diff_000…003</code> · 4096 px (burada küçültülmüş)</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section aria-labelledby="kurulum">
+    <h2 id="kurulum">Oyuna ekleme</h2>
+    <div class="two">
+      <div>
+        <h3>A · TheC</h3>
+        <ol class="steps">
+          <li><p>Yeleğin modelini (<code>teef_005_u.ydd</code>) ve dokusunu (<code>teef_diff_005_a_uni.ytd</code>) bul. Bunlar TheC Custom's paketinde ya da sunucunuzun kıyafet paketinde.</p></li>
+          <li><p>grzyClothTool'da bu çizime <code>teef_diff_005_b_uni.dds</code> dosyasını yeni doku olarak ekle ve kaynağı yeniden oluştur.</p></li>
+          <li><p>Oyunda: <code>SetPedComponentVariation(ped, 7, çizimNo, 1, 0)</code></p></li>
+        </ol>
+      </div>
+      <div>
+        <h3>B · SKAL</h3>
+        <ol class="steps">
+          <li><p><code>skal-yelek/stillborn_yelek</code> klasörünü sunucunun <code>resources</code> klasörüne koy.</p></li>
+          <li><p><code>server.cfg</code> dosyasına <code>ensure stillborn_yelek</code> ekle.</p></li>
+          <li><p>Oyunda: yelek slotu (bileşen 9), paketteki 4 çizim ve bütün renkleri Stillborn. <code>SetPedComponentVariation(ped, 9, çizimNo, 0, 0)</code></p></li>
+        </ol>
+        <div class="note"><strong>Dikkat:</strong> Paketin içindeki ad hâlâ <code>skalyeniyelek</code>. Orijinal SKAL paketi aynı sunucudaysa ikisini birlikte açma.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const back = document.getElementById('btn-back');
+  const front = document.getElementById('btn-front');
+  const spin = document.getElementById('btn-spin');
+  const target = new THREE.Vector3(0, 0.29, 0);
+  const dist = 1.35;
+
+  function b64(s, Type) {
+    const bin = atob(s); const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return new Type(u8.buffer);
+  }
+
+  function viewer(host, meshUrl, texUrl) {
+    const status = host.parentElement.querySelector('.status');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    host.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
+    scene.add(new THREE.HemisphereLight(0xf2ede4, 0x1a1816, 0.9));
+    const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(0.8, 1.4, -1.2); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.9); fill.position.set(-1.0, 0.6, 1.2); scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xd8d2c8, 0.7); rim.position.set(0, 1.0, 1.6); scene.add(rim);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.copy(target);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.minDistance = 0.55;
+    controls.maxDistance = 2.4;
+    controls.autoRotateSpeed = 1.2;
+
+    function place(theta) {
+      // theta 0 = back of the vest (both meshes have their back panel facing -Z)
+      camera.position.set(Math.sin(theta) * dist, target.y + 0.12, -Math.cos(theta) * dist);
+      camera.lookAt(target);
+      controls.update();
+    }
+    function resize() {
+      const w = host.clientWidth, h = host.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(resize).observe(host);
+    resize();
+    place(0);
+
+    Promise.all([
+      fetch(meshUrl).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      new Promise((res, rej) => new THREE.TextureLoader().load(texUrl, res, undefined, rej))
+    ]).then(([m, tex]) => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(b64(m.position, Float32Array), 3));
+      g.setAttribute('normal', new THREE.BufferAttribute(b64(m.normal, Float32Array), 3));
+      g.setAttribute('uv', new THREE.BufferAttribute(b64(m.uv, Float32Array), 2));
+      g.setIndex(new THREE.BufferAttribute(b64(m.index, m.indexType === 'u16' ? Uint16Array : Uint32Array), 1));
+      tex.flipY = false;
+      tex.encoding = THREE.sRGBEncoding;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.0, side: THREE.DoubleSide });
+      scene.add(new THREE.Mesh(g, mat));
+      status.hidden = true;
+    }).catch(() => { status.textContent = 'Yelek yüklenemedi. Sayfayı yenileyin.'; });
+
+    (function loop() {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(loop);
+    })();
+
+    return { controls, place };
+  }
+
+  const views = [
+    viewer(document.getElementById('vest-a'), 'yelek_mesh.json', 'doku.jpg'),
+    viewer(document.getElementById('vest-b'), 'yelek_skal_mesh.json', 'doku_skal.jpg')
+  ];
+
+  function setSpin(on) {
+    views.forEach(v => { v.controls.autoRotate = on; });
+    spin.setAttribute('aria-pressed', String(on));
+  }
+  function setView(theta, btn) {
+    views.forEach(v => v.place(theta));
+    back.setAttribute('aria-pressed', String(btn === back));
+    front.setAttribute('aria-pressed', String(btn === front));
+  }
+  setSpin(!reduceMotion);
+  back.addEventListener('click', () => setView(0, back));
+  front.addEventListener('click', () => setView(Math.PI, front));
+  spin.addEventListener('click', () => setSpin(!views[0].controls.autoRotate));
+})();
+</script>
+</body>
+</html>
