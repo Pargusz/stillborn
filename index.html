@@ -196,7 +196,7 @@
   <header>
     <div class="eyebrow">FiveM · Stillborn MC yelek · İki seçenek</div>
     <h1>Stillborn <span>MC</span></h1>
-    <p class="lede">İki yelek yan yana. A, referans sitedeki TheC yeleği. B, gönderdiğin SKAL paketindeki yelek. İkisinde de arkada kulüp logosu, önde STILLBORN ve PALETO BAY yazıları var. Modelleri sürükleyerek çevirebilirsin.</p>
+    <p class="lede">İki yelek yan yana. A, referans sitedeki TheC yeleği. B, gönderdiğin SKAL paketindeki yelek. İkisinde de arkada kulüp logosu, önde STILLBORN ve PALETO BAY yazıları var. İkisi de aynı FiveM kaynağında, oyuna konmaya hazır. Modelleri sürükleyerek çevirebilirsin.</p>
   </header>
 
   <section class="compare" aria-label="İki yeleğin 3D karşılaştırması">
@@ -240,12 +240,12 @@
           <tr><th scope="col">Özellik</th><th scope="col">A · TheC</th><th scope="col">B · SKAL</th></tr>
         </thead>
         <tbody>
-          <tr><th scope="row">Oyuna hazır mı</th><td><span class="no">Hayır.</span> Sadece doku hazır. Yeleğin modeli (<code>.ydd</code>) TheC Custom's'ta.</td><td><span class="yes">Evet.</span> Hazır FiveM kaynağı: model, doku ve ayar dosyaları içinde.</td></tr>
-          <tr><th scope="row">Slot</th><td>Bileşen 7 · Aksesuar</td><td>Bileşen 9 · Yelek / zırh (task)</td></tr>
-          <tr><th scope="row">Doku</th><td>2048 × 2048 · DXT5</td><td>4096 × 4096 · DXT1</td></tr>
+          <tr><th scope="row">Oyuna hazır mı</th><td><span class="yes">Evet.</span> Sitedeki 3D modelden FiveM yelek dosyası yapıldı. Kemik ağırlıkları SKAL yeleğinden aktarıldı.</td><td><span class="yes">Evet.</span> SKAL paketinin kendi modeli.</td></tr>
+          <tr><th scope="row">Slot</th><td>Bileşen 9 · Yelek · çizim 001</td><td>Bileşen 9 · Yelek · çizim 000</td></tr>
+          <tr><th scope="row">Doku</th><td>2048 px tasarım, oyunda 4096 · DXT1</td><td>4096 × 4096 · DXT1</td></tr>
           <tr><th scope="row">Arka</th><td>Büyük logo</td><td>Büyük logo</td></tr>
           <tr><th scope="row">Ön</th><td>Sol cepte STILLBORN bandı, altta PALETO BAY bandı</td><td>Göğüste küçük logo, altta STILLBORN / PALETO BAY. yaması</td></tr>
-          <tr><th scope="row">Model hakkı</th><td>TheC Custom's'tan izin gerekir</td><td>Gönderdiğin paketin modeli kullanıldı</td></tr>
+          <tr><th scope="row">Model hakkı</th><td>TheC Custom's'un modeli. Sunucuya koymadan önce izin alın.</td><td>Gönderdiğin paketin modeli</td></tr>
         </tbody>
       </table>
     </div>
@@ -256,11 +256,11 @@
     <div class="two">
       <figure>
         <img src="doku.jpg" alt="A yeleğinin doku sayfası: solda arka panel ve logo, sağda ön paneller" width="1024" height="1024" loading="lazy">
-        <figcaption>A · <code>teef_diff_005_b_uni</code> · 2048 px</figcaption>
+        <figcaption>A · <code>task_diff_001_a_uni</code> · 2048 px tasarım</figcaption>
       </figure>
       <figure>
         <img src="doku_skal.jpg" alt="B yeleğinin doku sayfası: solda büyük logo, sağda ön paneller ve STILLBORN / PALETO BAY yaması" width="1024" height="1024" loading="lazy">
-        <figcaption>B · <code>task_diff_000…003</code> · 4096 px (burada küçültülmüş)</figcaption>
+        <figcaption>B · <code>task_diff_000_a_uni</code> · 4096 px (burada küçültülmüş)</figcaption>
       </figure>
     </div>
   </section>
@@ -268,22 +268,14 @@
   <section aria-labelledby="kurulum">
     <h2 id="kurulum">Oyuna ekleme</h2>
     <div class="two">
+      <ol class="steps">
+        <li><p><code>stillborn_yelek</code> klasörünü sunucunun <code>resources</code> klasörüne koy.</p></li>
+        <li><p><code>server.cfg</code> dosyasına <code>ensure stillborn_yelek</code> ekle.</p></li>
+        <li><p>Oyunda yelek slotu (bileşen 9): çizim 000 B (SKAL), çizim 001 A (TheC). <code>SetPedComponentVariation(ped, 9, çizimNo, 0, 0)</code></p></li>
+      </ol>
       <div>
-        <h3>A · TheC</h3>
-        <ol class="steps">
-          <li><p>Yeleğin modelini (<code>teef_005_u.ydd</code>) ve dokusunu (<code>teef_diff_005_a_uni.ytd</code>) bul. Bunlar TheC Custom's paketinde ya da sunucunuzun kıyafet paketinde.</p></li>
-          <li><p>grzyClothTool'da bu çizime <code>teef_diff_005_b_uni.dds</code> dosyasını yeni doku olarak ekle ve kaynağı yeniden oluştur.</p></li>
-          <li><p>Oyunda: <code>SetPedComponentVariation(ped, 7, çizimNo, 1, 0)</code></p></li>
-        </ol>
-      </div>
-      <div>
-        <h3>B · SKAL</h3>
-        <ol class="steps">
-          <li><p><code>skal-yelek/stillborn_yelek</code> klasörünü sunucunun <code>resources</code> klasörüne koy.</p></li>
-          <li><p><code>server.cfg</code> dosyasına <code>ensure stillborn_yelek</code> ekle.</p></li>
-          <li><p>Oyunda: yelek slotu (bileşen 9), paketteki 4 çizim ve bütün renkleri Stillborn. <code>SetPedComponentVariation(ped, 9, çizimNo, 0, 0)</code></p></li>
-        </ol>
-        <div class="note"><strong>Dikkat:</strong> Paketin içindeki ad hâlâ <code>skalyeniyelek</code>. Orijinal SKAL paketi aynı sunucudaysa ikisini birlikte açma.</div>
+        <div class="note" style="margin-top:0"><strong>Test edin:</strong> TheC yeleğinin kemik ağırlıkları SKAL yeleğinden aktarıldı. Oyunda kol kaldırma ve eğilmede omuz ve bel kısmına bakın.</div>
+        <div class="note"><strong>Dikkat:</strong> Paketin içindeki ad hâlâ <code>skalyeniyelek</code>. Orijinal SKAL paketiyle birlikte açmayın. Çizim 002 ve 003, SKAL yeleğinin kopyası.</div>
       </div>
     </div>
   </section>
