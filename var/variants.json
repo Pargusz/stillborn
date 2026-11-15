@@ -1,0 +1,65 @@
+{
+ "ranks": [
+  "MEMBER",
+  "PRESIDENT",
+  "V.PRESIDENT",
+  "SGT AT ARMS",
+  "SECRETARY",
+  "TREASURER",
+  "ROAD CAPTAIN",
+  "ENFORCER",
+  "TAIL GUNNER",
+  "PROSPECT"
+ ],
+ "vests": {
+  "skal": {
+   "base": "var/skal_base.jpg",
+   "tabs": [
+    "var/skal_tab_MEMBER.png",
+    "var/skal_tab_PRESIDENT.png",
+    "var/skal_tab_VPRESIDENT.png",
+    "var/skal_tab_SGT_AT_ARMS.png",
+    "var/skal_tab_SECRETARY.png",
+    "var/skal_tab_TREASURER.png",
+    "var/skal_tab_ROAD_CAPTAIN.png",
+    "var/skal_tab_ENFORCER.png",
+    "var/skal_tab_TAIL_GUNNER.png",
+    "var/skal_tab_PROSPECT.png"
+   ],
+   "one": "var/skal_one_percent.png",
+   "tab": [
+    1300,
+    1252
+   ],
+   "onepos": [
+    1420,
+    1115
+   ],
+   "normal": "var/skal_normal.jpg"
+  },
+  "thec": {
+   "base": "var/thec_base.jpg",
+   "tabs": [
+    "var/thec_tab_MEMBER.png",
+    "var/thec_tab_PRESIDENT.png",
+    "var/thec_tab_VPRESIDENT.png",
+    "var/thec_tab_SGT_AT_ARMS.png",
+    "var/thec_tab_SECRETARY.png",
+    "var/thec_tab_TREASURER.png",
+    "var/thec_tab_ROAD_CAPTAIN.png",
+    "var/thec_tab_ENFORCER.png",
+    "var/thec_tab_TAIL_GUNNER.png",
+    "var/thec_tab_PROSPECT.png"
+   ],
+   "one": "var/thec_one_percent.png",
+   "tab": [
+    1223,
+    1123
+   ],
+   "onepos": [
+    1690,
+    1030
+   ]
+  }
+ }
+}

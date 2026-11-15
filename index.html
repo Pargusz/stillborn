@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Stillborn MC FiveM yeleği: iki seçenek yan yana 3D önizleme.">
+<meta name="description" content="Stillborn MC FiveM yeleği: iki yelek, rütbe ve 1% seçenekleriyle 3D önizleme.">
 <meta name="theme-color" content="#0f0e0d">
 <title>Stillborn MC Yelek</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,8 +12,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <style>
-  /* Layout: dark leather page. Two 3D vests side by side (A | B) under one shared view bar,
-     then a comparison table, the two texture sheets, and the in-game steps for each. */
+  /* Layout: dark leather page. One control bar (rank, 1%, view) drives two 3D vests side by side,
+     then the live texture sheets, the in-game texture numbers, and install notes. */
   :root {
     --leather: #0f0e0d;      /* page ground */
     --hide: #191715;         /* raised panels */
@@ -27,166 +27,77 @@
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  body {
-    background: var(--leather);
-    color: var(--thread);
-    font-family: var(--body);
-    font-size: 16px;
-    line-height: 1.6;
-  }
+  body { background: var(--leather); color: var(--thread); font-family: var(--body); font-size: 16px; line-height: 1.6; margin: 0; }
   .wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-block: 40px 64px;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 40px;
+    max-width: 1200px; margin: 0 auto; padding-block: 40px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px;
   }
   header { display: grid; gap: 6px; }
-  .eyebrow {
-    font-family: var(--label);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 13px;
-    color: var(--dim);
-  }
-  h1 {
-    font-family: var(--display);
-    font-weight: 400;
-    font-size: clamp(48px, 9vw, 92px);
-    line-height: 0.95;
-    margin: 0;
-    letter-spacing: 0.01em;
-    text-wrap: balance;
-  }
+  .eyebrow { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; font-size: 13px; color: var(--dim); }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(48px, 9vw, 92px); line-height: 0.95; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
   h1 span { color: var(--dim); }
   .lede { margin: 6px 0 0; color: var(--dim); max-width: 66ch; }
 
   .compare { display: grid; gap: 14px; }
-  .viewbar {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
-    justify-content: space-between;
+  .bar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+    padding: 12px 0; background: var(--leather); border-bottom: 1px dashed var(--seam);
   }
-  .viewbar .group { display: flex; flex-wrap: wrap; gap: 8px; }
-  .viewbar .hint {
-    font-family: var(--label); font-size: 12px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--dim);
+  .bar .group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .bar label, .bar .lbl { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; font-size: 13px; color: var(--dim); }
+  .bar button, .bar select {
+    font-family: var(--label); font-weight: 600; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--thread); background: transparent; border: 1px dashed var(--dim); border-radius: 3px; padding: 8px 14px; cursor: pointer;
   }
-  .viewbar button {
-    font-family: var(--label);
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--thread);
-    background: transparent;
-    border: 1px dashed var(--dim);
-    border-radius: 3px;
-    padding: 8px 14px;
-    cursor: pointer;
-  }
-  .viewbar button[aria-pressed="true"] { border-style: solid; border-color: var(--thread); background: var(--hide); }
-  .viewbar button:hover { border-color: var(--thread); }
-  .viewbar button:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+  .bar select { padding-right: 28px; background: var(--hide); border-style: solid; border-color: var(--seam); min-width: 190px; }
+  .bar select option { background: var(--hide); color: var(--thread); }
+  .bar button[aria-pressed="true"] { border-style: solid; border-color: var(--thread); background: var(--hide); }
+  .bar button:hover, .bar select:hover { border-color: var(--thread); }
+  .bar button:focus-visible, .bar select:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+  .bar .ingame { margin-left: auto; font-family: var(--label); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  .bar .ingame b { color: var(--thread); font-weight: 600; font-variant-numeric: tabular-nums; }
 
   .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
   .option { display: grid; gap: 12px; align-content: start; }
-  .stage {
-    position: relative;
-    background: radial-gradient(ellipse at 50% 40%, #24211e 0%, var(--leather) 70%);
-    border: 1px solid var(--seam);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .vest {
-    width: 100%;
-    height: min(66vh, 600px);
-    min-height: 360px;
-    display: block;
-    touch-action: none;
-    cursor: grab;
-  }
+  .stage { position: relative; background: radial-gradient(ellipse at 50% 40%, #24211e 0%, var(--leather) 70%); border: 1px solid var(--seam); border-radius: 4px; overflow: hidden; }
+  .vest { width: 100%; height: min(66vh, 600px); min-height: 360px; display: block; touch-action: none; cursor: grab; }
   .vest canvas { display: block; width: 100%; height: 100%; }
-  .status {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    font-family: var(--label); letter-spacing: 0.16em; text-transform: uppercase;
-    font-size: 13px; color: var(--dim); pointer-events: none;
-  }
+  .status { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--label); letter-spacing: 0.16em; text-transform: uppercase; font-size: 13px; color: var(--dim); pointer-events: none; }
   .status[hidden] { display: none; }
-  .tag {
-    position: absolute; left: 14px; top: 10px;
-    font-family: var(--display); font-size: 44px; line-height: 1;
-    color: var(--thread); pointer-events: none;
-  }
+  .tag { position: absolute; left: 14px; top: 10px; font-family: var(--display); font-size: 44px; line-height: 1; color: var(--thread); pointer-events: none; }
   .option h2 { margin: 0; padding: 0; border: 0; }
   .option p { margin: 0; color: var(--dim); font-size: 15px; }
 
-  h2 {
-    font-family: var(--label);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 18px;
-    margin: 0 0 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px dashed var(--seam);
-  }
-
-  .table-scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
-  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--seam); }
-  thead th {
-    font-family: var(--label); font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.12em; font-size: 14px; color: var(--thread);
-  }
-  tbody th {
-    font-family: var(--label); font-weight: 500; text-transform: uppercase;
-    letter-spacing: 0.1em; font-size: 13px; color: var(--dim); width: 22%;
-  }
-  td { color: var(--thread); }
-  td .yes { color: var(--thread); font-weight: 500; }
-  td .no { color: #d98a7e; font-weight: 500; }
+  h2 { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; font-size: 18px; margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px dashed var(--seam); }
+  h3 { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; font-size: 16px; margin: 0 0 12px; }
 
   .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
   @media (max-width: 820px) {
     .pair, .two { grid-template-columns: minmax(0, 1fr); }
-    .viewbar .hint { display: none; }
     .vest { height: 420px; }
+    .bar .ingame { margin-left: 0; width: 100%; }
   }
-
   figure { margin: 0; display: grid; gap: 10px; }
-  figure img { width: 100%; max-width: 100%; height: auto; display: block; border: 1px solid var(--seam); border-radius: 3px; }
+  figure canvas { width: 100%; height: auto; aspect-ratio: 1; display: block; border: 1px solid var(--seam); border-radius: 3px; background: var(--hide); }
   figcaption { font-size: 14px; color: var(--dim); }
 
-  h3 {
-    font-family: var(--label); font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.12em; font-size: 16px; margin: 0 0 12px;
-  }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--seam); }
+  thead th { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; font-size: 14px; }
+  tbody td { font-variant-numeric: tabular-nums; }
+  tbody tr.sel td { background: var(--hide); color: var(--thread); }
+  td.num { color: var(--dim); width: 7em; }
+
   ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
   ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
-  ol.steps li::before {
-    content: counter(s);
-    font-family: var(--display); font-size: 24px; line-height: 1.1; color: var(--oxblood);
-  }
+  ol.steps li::before { content: counter(s); font-family: var(--display); font-size: 24px; line-height: 1.1; color: var(--oxblood); }
   ol.steps p { margin: 0; }
-  code {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 0.86em;
-    background: var(--hide);
-    border: 1px solid var(--seam);
-    border-radius: 3px;
-    padding: 1px 5px;
-    overflow-wrap: anywhere;
-  }
-  .note {
-    margin-top: 18px; padding: 14px 16px;
-    border-left: 3px solid var(--oxblood);
-    background: var(--hide);
-    font-size: 14px; color: var(--dim);
-  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.86em; background: var(--hide); border: 1px solid var(--seam); border-radius: 3px; padding: 1px 5px; overflow-wrap: anywhere; }
+  .note { padding: 14px 16px; border-left: 3px solid var(--oxblood); background: var(--hide); font-size: 14px; color: var(--dim); }
+  .note + .note { margin-top: 12px; }
   .note strong { color: var(--thread); font-weight: 500; }
 </style>
 </head>
@@ -194,60 +105,45 @@
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">FiveM · Stillborn MC yelek · İki seçenek</div>
+    <div class="eyebrow">FiveM · Stillborn MC yelek · Rütbe seçenekleri</div>
     <h1>Stillborn <span>MC</span></h1>
-    <p class="lede">İki yelek yan yana. A, referans sitedeki TheC yeleği. B, gönderdiğin SKAL paketindeki yelek. İkisinde de arkada kulüp logosu, önde STILLBORN ve PALETO BAY yazıları var. İkisi de aynı FiveM kaynağında, oyuna konmaya hazır. Modelleri sürükleyerek çevirebilirsin.</p>
+    <p class="lede">İki yelek yan yana: A, TheC deri yeleği; B, SKAL kamuflaj omuzlu yeleği. Rütbeyi ve 1% yamasını seçtiğinde ikisi birlikte değişir. Her seçeneğin oyundaki doku numarası sağ üstte yazar.</p>
   </header>
 
   <section class="compare" aria-label="İki yeleğin 3D karşılaştırması">
-    <div class="viewbar">
-      <div class="group" role="group" aria-label="İki yeleğin görünümü">
-        <button type="button" id="btn-back" aria-pressed="true">Arka</button>
-        <button type="button" id="btn-front" aria-pressed="false">Ön</button>
-        <button type="button" id="btn-spin" aria-pressed="true">Döndür</button>
+    <div class="bar">
+      <div class="group">
+        <label for="rank">Rütbe</label>
+        <select id="rank"></select>
+        <button type="button" id="btn-one" aria-pressed="false">1% yaması</button>
       </div>
-      <div class="hint">Düğmeler ikisini birlikte çevirir · Sürükle · Yakınlaştır</div>
+      <div class="group" role="group" aria-label="Görünüm">
+        <button type="button" id="btn-back" aria-pressed="false">Arka</button>
+        <button type="button" id="btn-front" aria-pressed="true">Ön</button>
+        <button type="button" id="btn-spin" aria-pressed="false">Döndür</button>
+      </div>
+      <div class="ingame" aria-live="polite">Oyunda doku: <b id="texno">0</b></div>
     </div>
 
     <div class="pair">
       <article class="option">
         <div class="stage">
-          <div class="vest" id="vest-a" role="img" aria-label="A: TheC deri yeleği, arkasında Stillborn MC logosu"></div>
+          <div class="vest" id="vest-a" role="img" aria-label="A: TheC deri yeleği"></div>
           <div class="status">Yelek yükleniyor…</div>
           <div class="tag" aria-hidden="true">A</div>
         </div>
-        <h2>A · TheC yeleği</h2>
-        <p>Deri yelek, tek parça arma. Önde sol cepte STILLBORN bandı, altta PALETO BAY bandı. Enforcer ve bayrak yaması duruyor.</p>
+        <h2>A · TheC yeleği · çizim 001</h2>
+        <p>Deri yelek. Önde sol cepte STILLBORN bandı, sağ göğüste rütbe bandı, karşı göğüste 1%. Altta PALETO BAY.</p>
       </article>
-
       <article class="option">
         <div class="stage">
-          <div class="vest" id="vest-b" role="img" aria-label="B: SKAL kamuflaj astarlı yelek, arkasında Stillborn MC logosu"></div>
+          <div class="vest" id="vest-b" role="img" aria-label="B: SKAL kamuflaj omuzlu yelek"></div>
           <div class="status">Yelek yükleniyor…</div>
           <div class="tag" aria-hidden="true">B</div>
         </div>
-        <h2>B · SKAL yeleği</h2>
-        <p>Kamuflaj omuzlu yelek. Arkada büyük logo. Önde göğüste küçük logo, altta beyaz STILLBORN / PALETO BAY. yaması.</p>
+        <h2>B · SKAL yeleği · çizim 000</h2>
+        <p>Göğüste rütbe bandı ve 1%, karşı göğüste küçük logo, altta STILLBORN / PALETO BAY. Kabartmalar yeni yamalara göre yeniden yapıldı.</p>
       </article>
-    </div>
-  </section>
-
-  <section aria-labelledby="fark">
-    <h2 id="fark">Farklar</h2>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr><th scope="col">Özellik</th><th scope="col">A · TheC</th><th scope="col">B · SKAL</th></tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">Oyuna hazır mı</th><td><span class="yes">Evet.</span> Sitedeki 3D modelden FiveM yelek dosyası yapıldı. Kemik ağırlıkları SKAL yeleğinden aktarıldı.</td><td><span class="yes">Evet.</span> SKAL paketinin kendi modeli.</td></tr>
-          <tr><th scope="row">Slot</th><td>Bileşen 9 · Yelek · çizim 001</td><td>Bileşen 9 · Yelek · çizim 000</td></tr>
-          <tr><th scope="row">Doku</th><td>2048 px tasarım, oyunda 4096 · DXT1</td><td>4096 × 4096 · DXT1</td></tr>
-          <tr><th scope="row">Arka</th><td>Büyük logo</td><td>Büyük logo</td></tr>
-          <tr><th scope="row">Ön</th><td>Sol cepte STILLBORN bandı, altta PALETO BAY bandı</td><td>Göğüste küçük logo, altta STILLBORN / PALETO BAY. yaması</td></tr>
-          <tr><th scope="row">Model hakkı</th><td>TheC Custom's'un modeli. Sunucuya koymadan önce izin alın.</td><td>Gönderdiğin paketin modeli</td></tr>
-        </tbody>
-      </table>
     </div>
   </section>
 
@@ -255,13 +151,23 @@
     <h2 id="doku">Doku sayfaları</h2>
     <div class="two">
       <figure>
-        <img src="doku.jpg" alt="A yeleğinin doku sayfası: solda arka panel ve logo, sağda ön paneller" width="1024" height="1024" loading="lazy">
-        <figcaption>A · <code>task_diff_001_a_uni</code> · 2048 px tasarım</figcaption>
+        <canvas id="tex-a" width="2048" height="2048" aria-label="A yeleğinin seçili doku sayfası"></canvas>
+        <figcaption>A · <code id="name-a">task_diff_001_a_uni</code> · 2048 px</figcaption>
       </figure>
       <figure>
-        <img src="doku_skal.jpg" alt="B yeleğinin doku sayfası: solda büyük logo, sağda ön paneller ve STILLBORN / PALETO BAY yaması" width="1024" height="1024" loading="lazy">
-        <figcaption>B · <code>task_diff_000_a_uni</code> · 4096 px (burada küçültülmüş)</figcaption>
+        <canvas id="tex-b" width="2048" height="2048" aria-label="B yeleğinin seçili doku sayfası"></canvas>
+        <figcaption>B · <code id="name-b">task_diff_000_a_uni</code> · 4096 px (burada küçültülmüş)</figcaption>
       </figure>
+    </div>
+  </section>
+
+  <section aria-labelledby="liste">
+    <h2 id="liste">Oyundaki doku numaraları</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Rütbe</th><th scope="col">1% yok</th><th scope="col">1% var</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
     </div>
   </section>
 
@@ -271,11 +177,11 @@
       <ol class="steps">
         <li><p><code>stillborn_yelek</code> klasörünü sunucunun <code>resources</code> klasörüne koy.</p></li>
         <li><p><code>server.cfg</code> dosyasına <code>ensure stillborn_yelek</code> ekle.</p></li>
-        <li><p>Oyunda yelek slotu (bileşen 9): çizim 000 B (SKAL), çizim 001 A (TheC). <code>SetPedComponentVariation(ped, 9, çizimNo, 0, 0)</code></p></li>
+        <li><p>Yelek slotu (bileşen 9): çizim 000 SKAL, çizim 001 TheC. Doku numarası yukarıdaki tablodan. <code>SetPedComponentVariation(ped, 9, çizimNo, dokuNo, 0)</code></p></li>
       </ol>
       <div>
-        <div class="note" style="margin-top:0"><strong>Test edin:</strong> TheC yeleğinin kemik ağırlıkları SKAL yeleğinden aktarıldı. Oyunda kol kaldırma ve eğilmede omuz ve bel kısmına bakın.</div>
-        <div class="note"><strong>Dikkat:</strong> Paketin içindeki ad hâlâ <code>skalyeniyelek</code>. Orijinal SKAL paketiyle birlikte açmayın. Çizim 002 ve 003, SKAL yeleğinin kopyası.</div>
+        <div class="note"><strong>Test edin:</strong> TheC yeleğinin kemik ağırlıkları SKAL yeleğinden aktarıldı. Kol kaldırma ve eğilmede omuz ve bel kısmına bakın.</div>
+        <div class="note"><strong>Dikkat:</strong> Paketin içindeki ad hâlâ <code>skalyeniyelek</code>. Orijinal SKAL paketiyle birlikte açmayın.</div>
       </div>
     </div>
   </section>
@@ -284,19 +190,19 @@
 <script>
 (function () {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const back = document.getElementById('btn-back');
-  const front = document.getElementById('btn-front');
-  const spin = document.getElementById('btn-spin');
-  const target = new THREE.Vector3(0, 0.29, 0);
-  const dist = 1.35;
+  const $ = (id) => document.getElementById(id);
+  const target = new THREE.Vector3(0, 0.33, 0);
+  const dist = 1.15;
+  const LETTERS = 'abcdefghijklmnopqrst';
 
   function b64(s, Type) {
     const bin = atob(s); const u8 = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
     return new Type(u8.buffer);
   }
+  const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
 
-  function viewer(host, meshUrl, texUrl) {
+  function viewer(host, meshUrl, canvas, normalUrl) {
     const status = host.parentElement.querySelector('.status');
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -304,82 +210,94 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
     host.appendChild(renderer.domElement);
-
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
-    scene.add(new THREE.HemisphereLight(0xf2ede4, 0x1a1816, 0.9));
-    const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(0.8, 1.4, -1.2); scene.add(key);
-    const fill = new THREE.DirectionalLight(0xffffff, 0.9); fill.position.set(-1.0, 0.6, 1.2); scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xd8d2c8, 0.7); rim.position.set(0, 1.0, 1.6); scene.add(rim);
-
+    scene.add(new THREE.HemisphereLight(0xf2ede4, 0x1a1816, 0.8));
+    const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(0.8, 1.6, 1.2); scene.add(key);
+    const key2 = new THREE.DirectionalLight(0xffffff, 1.3); key2.position.set(-0.8, 1.6, -1.2); scene.add(key2);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(0, 0.2, 1.6); scene.add(fill);
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.copy(target);
-    controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.minDistance = 0.55;
-    controls.maxDistance = 2.4;
-    controls.autoRotateSpeed = 1.2;
-
+    controls.target.copy(target); controls.enableDamping = true; controls.enablePan = false;
+    controls.minDistance = 0.4; controls.maxDistance = 2.4; controls.autoRotateSpeed = 1.2;
     function place(theta) {
       // theta 0 = back of the vest (both meshes have their back panel facing -Z)
-      camera.position.set(Math.sin(theta) * dist, target.y + 0.12, -Math.cos(theta) * dist);
-      camera.lookAt(target);
-      controls.update();
+      camera.position.set(Math.sin(theta) * dist, target.y + 0.08, -Math.cos(theta) * dist);
+      camera.lookAt(target); controls.update();
     }
     function resize() {
       const w = host.clientWidth, h = host.clientHeight;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
     }
-    new ResizeObserver(resize).observe(host);
-    resize();
-    place(0);
-
+    new ResizeObserver(resize).observe(host); resize(); place(Math.PI);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.flipY = false; tex.encoding = THREE.sRGBEncoding; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.0, side: THREE.DoubleSide });
     Promise.all([
       fetch(meshUrl).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-      new Promise((res, rej) => new THREE.TextureLoader().load(texUrl, res, undefined, rej))
-    ]).then(([m, tex]) => {
+      normalUrl ? new Promise((res, rej) => new THREE.TextureLoader().load(normalUrl, res, undefined, rej)) : Promise.resolve(null)
+    ]).then(([m, nrm]) => {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.BufferAttribute(b64(m.position, Float32Array), 3));
       g.setAttribute('normal', new THREE.BufferAttribute(b64(m.normal, Float32Array), 3));
       g.setAttribute('uv', new THREE.BufferAttribute(b64(m.uv, Float32Array), 2));
       g.setIndex(new THREE.BufferAttribute(b64(m.index, m.indexType === 'u16' ? Uint16Array : Uint32Array), 1));
-      tex.flipY = false;
-      tex.encoding = THREE.sRGBEncoding;
-      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-      const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.0, side: THREE.DoubleSide });
+      // the pack's maps store +dH/du in red and -dH/dv in green; three.js wants -dH/du, -dH/dv
+      if (nrm) { nrm.flipY = false; mat.normalMap = nrm; mat.normalScale.set(-1, 1); mat.needsUpdate = true; }
+      
       scene.add(new THREE.Mesh(g, mat));
       status.hidden = true;
     }).catch(() => { status.textContent = 'Yelek yüklenemedi. Sayfayı yenileyin.'; });
-
-    (function loop() {
-      controls.update();
-      renderer.render(scene, camera);
-      requestAnimationFrame(loop);
-    })();
-
-    return { controls, place };
+    (function loop() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
+    return { controls, place, tex };
   }
 
-  const views = [
-    viewer(document.getElementById('vest-a'), 'yelek_mesh.json', 'doku.jpg'),
-    viewer(document.getElementById('vest-b'), 'yelek_skal_mesh.json', 'doku_skal.jpg')
-  ];
-
-  function setSpin(on) {
-    views.forEach(v => { v.controls.autoRotate = on; });
-    spin.setAttribute('aria-pressed', String(on));
-  }
-  function setView(theta, btn) {
-    views.forEach(v => v.place(theta));
-    back.setAttribute('aria-pressed', String(btn === back));
-    front.setAttribute('aria-pressed', String(btn === front));
-  }
-  setSpin(!reduceMotion);
-  back.addEventListener('click', () => setView(0, back));
-  front.addEventListener('click', () => setView(Math.PI, front));
-  spin.addEventListener('click', () => setSpin(!views[0].controls.autoRotate));
+  fetch('var/variants.json').then(r => r.json()).then(async (V) => {
+    const ranks = V.ranks;
+    const sel = $('rank'), rows = $('rows');
+    ranks.forEach((r, i) => {
+      const o = document.createElement('option'); o.value = i; o.textContent = r; sel.appendChild(o);
+      const tr = document.createElement('tr'); tr.dataset.i = i;
+      tr.innerHTML = `<td>${r}</td><td class="num">${i}  (${LETTERS[i]})</td><td class="num">${i + 10}  (${LETTERS[i + 10]})</td>`;
+      rows.appendChild(tr);
+    });
+    const vests = {};
+    for (const [key, cv, nm, dr] of [['thec', 'tex-a', 'name-a', '001'], ['skal', 'tex-b', 'name-b', '000']]) {
+      const v = V.vests[key];
+      const [base, one, ...tabs] = await Promise.all([loadImg(v.base), loadImg(v.one), ...v.tabs.map(loadImg)]);
+      vests[key] = { v, base, one, tabs, canvas: $(cv), name: $(nm), dr };
+    }
+    const views = [
+      viewer($('vest-a'), 'yelek_mesh.json', vests.thec.canvas, null),
+      viewer($('vest-b'), 'yelek_skal_mesh.json', vests.skal.canvas, V.vests.skal.normal)
+    ];
+    vests.thec.view = views[0]; vests.skal.view = views[1];
+    let rank = 0, pct = false;
+    function draw() {
+      const idx = rank + (pct ? 10 : 0);
+      for (const k of ['thec', 'skal']) {
+        const s = vests[k], ctx = s.canvas.getContext('2d');
+        ctx.drawImage(s.base, 0, 0);
+        ctx.drawImage(s.tabs[rank], s.v.tab[0], s.v.tab[1]);
+        if (pct) ctx.drawImage(s.one, s.v.onepos[0], s.v.onepos[1]);
+        s.view.tex.needsUpdate = true;
+        s.name.textContent = `task_diff_${s.dr}_${LETTERS[idx]}_uni`;
+      }
+      $('texno').textContent = `${idx} (${LETTERS[idx]})`;
+      rows.querySelectorAll('tr').forEach(tr => tr.classList.toggle('sel', +tr.dataset.i === rank));
+    }
+    sel.addEventListener('change', () => { rank = +sel.value; draw(); });
+    $('btn-one').addEventListener('click', () => { pct = !pct; $('btn-one').setAttribute('aria-pressed', String(pct)); draw(); });
+    const back = $('btn-back'), front = $('btn-front'), spin = $('btn-spin');
+    function setView(theta, btn) {
+      views.forEach(v => v.place(theta));
+      back.setAttribute('aria-pressed', String(btn === back)); front.setAttribute('aria-pressed', String(btn === front));
+    }
+    function setSpin(on) { views.forEach(v => { v.controls.autoRotate = on; }); spin.setAttribute('aria-pressed', String(on)); }
+    back.addEventListener('click', () => setView(0, back));
+    front.addEventListener('click', () => setView(Math.PI, front));
+    spin.addEventListener('click', () => setSpin(!views[0].controls.autoRotate));
+    draw();
+  });
 })();
 </script>
 </body>
